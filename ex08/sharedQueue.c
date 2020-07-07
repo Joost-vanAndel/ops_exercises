@@ -50,7 +50,7 @@ int main() {
   
   
   printf("\nDelete the current queue:\n");
-  //deleteQueue(&queue);
+  deleteQueue(&queue);
   showQueue(&queue);
   
   printf("\nCreate a new queue:\n");
