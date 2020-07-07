@@ -11,6 +11,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void producer(queue_t *queue, data_t data, int interval);
+void consumer(queue_t *queue, data_t data, int interval);
+
 int main() {
   data_t data = {1, "Hello queue"};
   queue_t queue = {NULL};  // Note: element of queue = NULL
@@ -22,8 +25,6 @@ int main() {
   createQueue(&queue, data);
   showQueue(&queue);
   data.intVal++;
-  
-  
   
   printf("\nAdd new data to the queue:\n");
   pushQueue(&queue, data);
@@ -43,11 +44,8 @@ int main() {
   popQueue(&queue);
   showQueue(&queue);
   
-  
-  
   printf("\nFront iValue/first node: %d\n", frontQueue(&queue)->intVal);
   printf("Back  iValue/last node:  %d\n", backQueue(&queue)->intVal);
-  
   
   printf("\nDelete the current queue:\n");
   deleteQueue(&queue);
@@ -59,4 +57,28 @@ int main() {
   data.intVal++;
   
   return 0;
+}
+
+void producer(queue_t *queue, data_t data, int interval)
+{
+  while(1)
+    {
+      pushQueue(&queue, data);
+      sleep(interval);
+    }
+  return;
+}
+void consumer(queue_t *queue, data_t data, int interval)
+{
+  FILE *fp;
+  fp = fopen ("queueFile.txt", "a");
+
+  while(1)
+    {
+      writeQueueToFile(&queue, &fp);
+      showQueue(&queue);
+      sleep(interval);
+    }
+  fclose(fp);
+  return;
 }

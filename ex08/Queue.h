@@ -11,6 +11,7 @@
 #define QUEUE_H
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #define TEXT_SIZE 20
 
@@ -39,5 +40,6 @@ void pushQueue(queue_t* queue, data_t data);
 void popQueue(queue_t* queue);
 void deleteQueue(queue_t* queue);
 void showQueue(const queue_t* queue);
+void writeQueueToFile(const queue_t* queue, FILE *queuefile);
 
 #endif

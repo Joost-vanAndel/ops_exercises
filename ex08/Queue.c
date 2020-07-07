@@ -8,8 +8,6 @@
 
 
 #include "Queue.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 // Create a new queue:
 void createQueue(queue_t* queue, data_t data) {
@@ -113,6 +111,22 @@ void showQueue(const queue_t* queue) {
     do {
       nextN = nextN->nextNode;
       printf("pNode = %p  Data = '%d' '%s'  nextN = %p\n",
+             (void*)nextN, nextN->data.intVal, nextN->data.text, (void*)nextN->nextNode);
+    } while(nextN != queue->lastNode);
+  }
+}
+
+// Print the data/nodes in a queue to a file:
+void writeQueueToFile(const queue_t* queue, FILE *fp){
+  const node_t* nextN = queue->lastNode;
+  if(nextN == NULL) {
+    fprintf(fp, "Queue is empty, last node is %p\n", (void*) queue->lastNode);
+  } else {
+    fprintf(fp, "Queue contains %ld nodes:\n", sizeQueue(queue));
+    fprintf(fp, "Last node: %p\n", (void*) queue->lastNode);
+    do {
+      nextN = nextN->nextNode;
+      fprintf(fp, "pNode = %p  Data = '%d' '%s'  nextN = %p\n",
              (void*)nextN, nextN->data.intVal, nextN->data.text, (void*)nextN->nextNode);
     } while(nextN != queue->lastNode);
   }
