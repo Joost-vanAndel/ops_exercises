@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <signal.h>
+
+void sigintHandler(int sig);
 
 void *producer(void *arguments);
 void *consumer(void *arguments);
@@ -24,7 +27,11 @@ struct thread_args {
 
 pthread_mutex_t lock;
 
+int endProgram = 0;
+
 int main() {
+  signal(SIGINT, sigintHandler);
+
   pthread_t producerA, producerB, producerC, consumerA;
   queue_t queue = {NULL};  // Note: element of queue = NULL
   struct thread_args argsP_A = {NULL}, argsP_B = {NULL}, argsP_C = {NULL}, argsC_A = {NULL};
@@ -70,6 +77,9 @@ int main() {
   pthread_mutex_destroy(&lock);
   
   printf("threads joined and mutex destroyed\n");
+
+  deleteQueue(&queue);
+  printf("queue deleted\n");
   return 0;
 }
 
@@ -77,7 +87,7 @@ void *producer(void *arguments)
 {  
   struct thread_args *args = (struct thread_args*)arguments;
   printf("new producer %d\n", args->data.intVal);
-  while(1)
+  while(!endProgram)
     {
       pthread_mutex_lock(&lock);
       printf("producer %d pushing\n", args->data.intVal);
@@ -101,7 +111,7 @@ void *consumer(void *arguments)
       printf("file failed to open\n");
       exit(1);
     }
-  while(1)
+  while(!endProgram)
     {
       pthread_mutex_lock(&lock);
       printf("now consuming\n");
@@ -115,6 +125,13 @@ void *consumer(void *arguments)
 	
       sleep(args->interval);
     }
-  fclose(fp);
+  printf("close file\n");
+  //fclose(fp);
+  return;
+}
+
+void sigintHandler(int sig)
+{
+  endProgram = 1;
   return;
 }
