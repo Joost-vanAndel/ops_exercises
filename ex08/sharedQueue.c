@@ -22,6 +22,8 @@ struct thread_args {
   int interval;
 };
 
+pthread_mutex_t lock;
+
 int main() {
   pthread_t producerA, producerB, producerC, consumerA;
   queue_t queue = {NULL};  // Note: element of queue = NULL
@@ -47,6 +49,9 @@ int main() {
   argsP_C.interval = 4;
   argsC_A.interval = 15;
 
+  printf("initializing mutex\n");
+  pthread_mutex_init(&lock, NULL);
+  
   printf("creating queue\n");
   createQueue(&queue, baseData);
 
@@ -62,19 +67,23 @@ int main() {
   pthread_join(producerB, NULL);
   pthread_join(producerC, NULL);
   pthread_join(consumerA, NULL);
-
-  printf("threads joined\n");
+  pthread_mutex_destroy(&lock);
+  
+  printf("threads joined and mutex destroyed\n");
   return 0;
 }
 
 void *producer(void *arguments)
-{
+{  
   struct thread_args *args = (struct thread_args*)arguments;
   printf("new producer %d\n", args->data.intVal);
   while(1)
     {
+      pthread_mutex_lock(&lock);
       printf("producer %d pushing\n", args->data.intVal);
       pushQueue(&args->queue, args->data);
+      pthread_mutex_unlock(&lock);
+	
       sleep(args->interval);
     }
   return;
@@ -94,6 +103,7 @@ void *consumer(void *arguments)
     }
   while(1)
     {
+      pthread_mutex_lock(&lock);
       printf("now consuming\n");
       printf("write queue to file\n");
       //writeQueueToFile(&args->queue, fp);
@@ -101,6 +111,8 @@ void *consumer(void *arguments)
       //showQueue(&args->queue);
       printf("empty queue\n");
       emptyQueue(&args->queue);
+      pthread_mutex_unlock(&lock);
+	
       sleep(args->interval);
     }
   fclose(fp);
